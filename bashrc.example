@@ -1,0 +1,7 @@
+BASHD_THEME=default
+
+. /path/to/bash.d/bashd.bash
+
+make_dir_complete jk ~/src
+make_dir_complete h ~/etc
+make_dir_complete dl /download/errado/
