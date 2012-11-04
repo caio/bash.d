@@ -2,10 +2,11 @@ __prompt_current_directory() {
     transform_pwd() {
         curdir="$@"
         curdir=${curdir/#~\/src\//:}
-        curdir=${curdir/#:personal\//${col_txtcyn}➤${col_txtblu}}
-        curdir=${curdir/#:work\//${col_txtred}⚒${col_txtblu}}
+        curdir=${curdir/#:personal\//${FG_CYAN}➤${FG_BLUE}}
+        curdir=${curdir/#:work\//${FG_RED}⚒${FG_BLUE}}
+        curdir=${curdir/#:booking.com\//${FG_BOLD_WHITE}${BG_BLUE}B${FG_BOLD_CYAN}${BG_BLUE}.${FG_BLUE}}
 
-        curdir=${curdir/#~\/etc\//${col_txtpur}ж${col_txtblu}}
+        curdir=${curdir/#~\/etc\//${FG_PURPLE}ж${FG_BLUE}}
         echo $curdir
     }
 
