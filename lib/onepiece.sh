@@ -10,7 +10,7 @@ __wm_check() {
 
 wm() {
     video="${@}"
-    mplayer "${video}"
+    mplayer -ass -embeddedfonts "${video}"
     result=$?
     if test $result -eq 0; then
         mv "${video}" WATCHED/
