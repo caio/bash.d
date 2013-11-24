@@ -40,8 +40,15 @@ pwdappend() {
 }
 
 bashd_source() {
+    local must_be_executable=1
+
+    if [ "$1" = "-f" ]; then
+        must_be_executable=0
+        shift
+    fi
+
     for file in ${@}; do
-        test ! -f ${file} -o ! -x ${file} && continue
+        test ! -f ${file} -o \( $must_be_executable = 1 -a ! -x ${file} \) && continue
         . ${file} || _bashd_error "Unable to load ${file}"
     done
 }
