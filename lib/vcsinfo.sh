@@ -24,39 +24,34 @@ __vcs_dir() {
   git_dir() {
 
       parse_git_branch() {
-          # Capture the output of the "git status" command.
-          git_status="$(git status --ignore-submodules 2> /dev/null)"
+          git_status="$(git status -b --porcelain --ignore-submodules 2> /dev/null)"
 
-          # Set color based on clean/staged/dirty.
-          if [[ ${git_status} =~ "working directory clean" ]]; then
-              state="${GREEN}"
-          elif [[ ${git_status} =~ "Changes to be committed" ]]; then
+          # Index/Worktree status:
+          #     green  => clean
+          #     yellow => index modified (has precedence over red)
+          #     red    => worktree modified
+          local state="${GREEN}"
+          if [[ ${git_status} =~ $'\n'(M |A |R |C |D ) ]]; then
               state="${YELLOW}"
-          else
+          elif [[ ${git_status} =~ $'\n'( M| D|\?\?) ]]; then
               state="${RED}"
           fi
 
-          # Set arrow icon based on status against remote.
-          remote_pattern="# Your branch is (ahead of|behind)"
-          if [[ ${git_status} =~ ${remote_pattern} ]]; then
-              if [[ ${BASH_REMATCH[1]} == "ahead of" ]]; then
-                  remote="↑"
-              else
-                  remote="↓"
-              fi
-          fi
-          diverge_pattern="# Your branch and (.*) have diverged"
-          if [[ ${git_status} =~ ${diverge_pattern} ]]; then
-              remote="↕"
+          local remote=""
+          [[ ${git_status} =~ ^##.+\[.*ahead ]] && remote="↑"
+          if [[ ${git_status} =~ ^##.+\[.*behind ]]; then
+              # If behind AND ahead, the status is "diverged"
+              test -z $remote && remote="↓" || remote="↕"
           fi
 
-          # Get the name of the branch.
-          branch_pattern="^# On branch ([^${IFS}]*)"
-          if [[ ${git_status} =~ ${branch_pattern} ]]; then
+          # Get the name of the branch by trying to match
+          #     ## branchname..upstream [ahead X, behind Y]
+          if [[ ${git_status} =~ ^##\ ([^\ ]+)($'\n'| \[|$) ]]; then
               branch=${BASH_REMATCH[1]}
+              # Remove the ...upstream part, if present
+              branch=${branch%...*}
           fi
 
-          # Display the prompt.
           echo "${state}${branch}${remote}${COLOR_NONE}"
       }
       base_dir=$(git rev-parse --git-dir 2>/dev/null) || return 1
