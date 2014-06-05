@@ -25,16 +25,21 @@ __vcs_dir() {
 
     parse_git_branch() {
       git_status="$(git status -b --porcelain --ignore-submodules 2> /dev/null)"
+      is_dirty=0
+      dirty_flag=""
 
       # Index/Worktree status:
       #     green  => clean
       #     yellow => index modified (has precedence over red)
       #     red    => worktree modified
       local state="${GREEN}"
-      if [[ ${git_status} =~ $'\n'(M |A |R |C |D ) ]]; then
-          state="${YELLOW}"
-      elif [[ ${git_status} =~ $'\n'( M| D|\?\?) ]]; then
+      if [[ ${git_status} =~ $'\n'?(M|D) ]]; then
           state="${RED}"
+          is_dirty=1
+      fi
+      if [[ ${git_status} =~ $'\n'(M|A|R|C|D) ]]; then
+          state="${YELLOW}"
+          test $is_dirty && dirty_flag="${BLUE}!"
       fi
 
       local remote=""
@@ -52,7 +57,7 @@ __vcs_dir() {
           branch=${branch%...*}
       fi
 
-      echo "${state}${branch}${remote}${COLOR_NONE}"
+      echo "${state}${branch}${remote}${dirty_flag}${COLOR_NONE}"
     }
 
     base_dir=$(git rev-parse --git-dir 2>/dev/null) || return 1
