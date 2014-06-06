@@ -33,7 +33,7 @@ __vcs_dir() {
       #     yellow => index modified (has precedence over red)
       #     red    => worktree modified
       local state="${GREEN}"
-      if [[ ${git_status} =~ $'\n'?(M|D) ]]; then
+      if [[ ${git_status} =~ $'\n'?(M|D|\?) ]]; then
           state="${RED}"
           is_dirty=1
       fi
